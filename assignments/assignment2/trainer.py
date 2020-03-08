@@ -74,7 +74,7 @@ class Trainer:
 
         return multiclass_accuracy(pred, y)
 
-    def fit(self):
+    def fit(self, verbose=False):
         """
         Trains a model
         """
@@ -96,11 +96,11 @@ class Trainer:
             batch_losses = []
 
             for batch_indices in batches_indices:
-                # TODO Generate batches based on batch_indices and
-                # use model to generate loss and gradients for all
-                # the params
-
-                raise Exception("Not implemented!")
+                # Generate batches based on batch_indices and
+                # use model to generate loss and gradients for all the params
+                X_batch = self.dataset.train_X[batch_indices]
+                y_batch = self.dataset.train_y[batch_indices]
+                loss = self.model.compute_loss_and_gradients(X_batch, y_batch)
 
                 for param_name, param in self.model.params().items():
                     optimizer = self.optimizers[param_name]
@@ -109,8 +109,8 @@ class Trainer:
                 batch_losses.append(loss)
 
             if np.not_equal(self.learning_rate_decay, 1.0):
-                # TODO: Implement learning rate decay
-                raise Exception("Not implemented!")
+                # Implement learning rate decay
+                self.learning_rate *= self.learning_rate_decay
 
             ave_loss = np.mean(batch_losses)
 
@@ -120,8 +120,9 @@ class Trainer:
             val_accuracy = self.compute_accuracy(self.dataset.val_X,
                                                  self.dataset.val_y)
 
-            print("Loss: %f, Train accuracy: %f, val accuracy: %f" %
-                  (batch_losses[-1], train_accuracy, val_accuracy))
+            if verbose or (epoch == self.num_epochs - 1):
+                print("Loss: %f, Train accuracy: %f, val accuracy: %f" %
+                      (ave_loss, train_accuracy, val_accuracy))
 
             loss_history.append(ave_loss)
             train_acc_history.append(train_accuracy)
