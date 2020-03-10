@@ -207,6 +207,8 @@ class ConvolutionalLayer:
 
         self.padding = padding
 
+        self.stride = None
+        self.X = None
 
     def forward(self, X):
         batch_size, height, width, channels = X.shape
@@ -220,6 +222,11 @@ class ConvolutionalLayer:
         
         # It's ok to use loops for going over width and height
         # but try to avoid having any other loops
+
+        # compute output fields by formula: (W−F+2P)/S+1 from http://cs231n.github.io/convolutional-networks/
+        out_height = (height - self.filter_size + 2 * self.padding) / self.stride + 1
+        out_width = (width - self.filter_size + 2 * self.padding) / self.stride + 1
+
         for y in range(out_height):
             for x in range(out_width):
                 # TODO: Implement forward pass for specific location
