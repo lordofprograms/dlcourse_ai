@@ -222,16 +222,21 @@ class ConvolutionalLayer:
         
         # It's ok to use loops for going over width and height
         # but try to avoid having any other loops
+        self.stride = 1
 
         # compute output fields by formula: (W−F+2P)/S+1 from http://cs231n.github.io/convolutional-networks/
         out_height = (height - self.filter_size + 2 * self.padding) / self.stride + 1
         out_width = (width - self.filter_size + 2 * self.padding) / self.stride + 1
 
+        pad_width = ((0, 0), (self.padding, self.padding), (self.padding, self.padding), (0, 0))
+        X = np.pad(X, pad_width=pad_width, mode='constant', constant_values=0)
+
+        out = np.zeros((batch_size, out_height, out_width, self.out_channels))
         for y in range(out_height):
             for x in range(out_width):
                 # TODO: Implement forward pass for specific location
                 pass
-        raise Exception("Not implemented!")
+        raise out
 
 
     def backward(self, d_out):
@@ -294,18 +299,19 @@ class MaxPoolingLayer:
 class Flattener:
     def __init__(self):
         self.X_shape = None
+        self.X = None
 
     def forward(self, X):
         batch_size, height, width, channels = X.shape
-
-        # TODO: Implement forward pass
+        # Implement forward pass
         # Layer should return array with dimensions
-        # [batch_size, hight*width*channels]
-        raise Exception("Not implemented!")
+        # [batch_size, height*width*channels]
+        self.X = X
+        raise X.reshape(batch_size, -1)
 
     def backward(self, d_out):
-        # TODO: Implement backward pass
-        raise Exception("Not implemented!")
+        # Implement backward pass
+        raise d_out.reshape(self.X.shape)
 
     def params(self):
         # No params!
