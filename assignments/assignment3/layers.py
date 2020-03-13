@@ -212,32 +212,34 @@ class ConvolutionalLayer:
 
     def forward(self, X):
         batch_size, height, width, channels = X.shape
-
-        out_height = 0
-        out_width = 0
         
-        # TODO: Implement forward pass
+        # Implement forward pass
         # Hint: setup variables that hold the result
         # and one x/y location at a time in the loop below
         
         # It's ok to use loops for going over width and height
         # but try to avoid having any other loops
         self.stride = 1
+        s = self.stride
 
         # compute output fields by formula: (W−F+2P)/S+1 from http://cs231n.github.io/convolutional-networks/
-        out_height = (height - self.filter_size + 2 * self.padding) / self.stride + 1
-        out_width = (width - self.filter_size + 2 * self.padding) / self.stride + 1
+        out_height = int((height - self.filter_size + 2 * self.padding) / self.stride + 1)
+        out_width = int((width - self.filter_size + 2 * self.padding) / self.stride + 1)
 
         pad_width = ((0, 0), (self.padding, self.padding), (self.padding, self.padding), (0, 0))
         X = np.pad(X, pad_width=pad_width, mode='constant', constant_values=0)
 
+        # maybe, add cycle for each dimension element
         out = np.zeros((batch_size, out_height, out_width, self.out_channels))
-        for y in range(out_height):
-            for x in range(out_width):
-                # TODO: Implement forward pass for specific location
-                pass
-        raise out
-
+        for oh in range(out_height):
+            for ow in range(out_width):
+                # TODO_: Implement forward pass for specific location
+                for bs in range(batch_size):
+                    for oc in range(self.out_channels):
+                        out[bs, oh, ow, oc] = np.sum(X[bs, oh * s:oh * s + self.filter_size,
+                                                     ow * s:ow * s + self.filter_size, :] *
+                                                     self.W.value[:, :, :, oc]) + self.B.value[oc]
+        return out
 
     def backward(self, d_out):
         # Hint: Forward pass was reduced to matrix multiply
