@@ -233,12 +233,13 @@ class ConvolutionalLayer:
         out = np.zeros((batch_size, out_height, out_width, self.out_channels))
         for oh in range(out_height):
             for ow in range(out_width):
-                # TODO_: Implement forward pass for specific location
+                # Implement forward pass for specific location
                 for bs in range(batch_size):
                     for oc in range(self.out_channels):
                         out[bs, oh, ow, oc] = np.sum(X[bs, oh * s:oh * s + self.filter_size,
                                                      ow * s:ow * s + self.filter_size, :] *
                                                      self.W.value[:, :, :, oc]) + self.B.value[oc]
+        self.X = X
         return out
 
     def backward(self, d_out):
@@ -247,8 +248,17 @@ class ConvolutionalLayer:
         # when you implemented FullyConnectedLayer
         # Just do it the same number of times and accumulate gradients
 
+        X = self.X
+        W = self.W.value
+
+        filter_size, filter_size, channels, out_channels = W.shape
         batch_size, height, width, channels = X.shape
         _, out_height, out_width, out_channels = d_out.shape
+        dX = np.zeros_like(X)
+        dW = np.zeros_like(W)
+        dB = np.sum(d_out, (0, 1, 2))
+        s = self.stride
+        padding = self.padding
 
         # TODO: Implement backward pass
         # Same as forward, setup variables of the right shape that
@@ -263,10 +273,13 @@ class ConvolutionalLayer:
                 # the parameters (W and B)
                 pass
 
-        raise Exception("Not implemented!")
+        self.B.grad += dB
+        self.W.grad += dW
+
+        return dX
 
     def params(self):
-        return { 'W': self.W, 'B': self.B }
+        return {'W': self.W, 'B': self.B}
 
 
 class MaxPoolingLayer:
