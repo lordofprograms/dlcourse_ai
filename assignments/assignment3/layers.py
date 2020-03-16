@@ -266,12 +266,25 @@ class ConvolutionalLayer:
         # of the output
 
         # Try to avoid having any other loops here too
-        for y in range(out_height):
-            for x in range(out_width):
-                # TODO: Implement backward pass for specific location
-                # Aggregate gradients for both the input and
-                # the parameters (W and B)
-                pass
+        for c in range(channels):
+            for oc in range(out_channels):
+                for ho in range(out_height):
+                    for wo in range(out_width):
+                        # Implement backward pass for specific location
+                        # Aggregate gradients for both the input and
+                        # the parameters (W and B)
+                        for hh in range(filter_size):
+                            for ww in range(filter_size):
+                                dW[hh, ww, c, oc] += np.dot(X[:, ho * s + hh, wo * s + ww, c].T, d_out[:, ho, wo, oc])
+                        for hi in range(height):
+                            for wi in range(width):
+                                if (hi - ho * s >= 0) and (hi - ho * s < filter_size) and \
+                                        (wi - wo * s >= 0) and (wi - wo * s < filter_size):
+                                    dX[:, hi, wi, c] += np.dot(W[hi - ho * s, wi - wo * s, c, oc], d_out[:, ho, wo, oc])
+
+            # raise Exception("Not implemented!")
+        if padding != 0:
+            dX = dX[:, padding:-padding, padding:-padding, :]  # bach to the initial input size
 
         self.B.grad += dB
         self.W.grad += dW
