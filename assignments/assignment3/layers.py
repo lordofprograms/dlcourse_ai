@@ -310,10 +310,23 @@ class MaxPoolingLayer:
 
     def forward(self, X):
         batch_size, height, width, channels = X.shape
-        # TODO: Implement maxpool forward pass
+        # Implement maxpool forward pass
         # Hint: Similarly to Conv layer, loop on
         # output x/y dimension
-        raise Exception("Not implemented!")
+
+        out_height = int(np.ceil(1 + (height - self.pool_size) / self.stride))
+        out_width = int(np.ceil(1 + (width - self.pool_size) / self.stride))
+
+        out = np.zeros((batch_size, out_height, out_width, channels))
+        s = self.stride
+        for bs in range(batch_size):
+            for ch in range(channels):
+                for oh in range(out_height):
+                    for ow in range(out_width):
+                        out[bs, oh, ow, ch] = np.amax(X[bs, oh * s:np.minimum(oh * s + self.pool_size, height),
+                                                      ow * s:np.minimum(ow * s + self.pool_size, width), ch])
+        self.X = X
+        return out
 
     def backward(self, d_out):
         # TODO: Implement maxpool backward pass
@@ -339,7 +352,8 @@ class Flattener:
 
     def backward(self, d_out):
         # Implement backward pass
-        raise d_out.reshape(self.X.shape)
+        X = self.X
+        return d_out.reshape(X.shape)
 
     def params(self):
         # No params!
