@@ -329,11 +329,29 @@ class MaxPoolingLayer:
         return out
 
     def backward(self, d_out):
-        # TODO: Implement maxpool backward pass
+        # Implement maxpool backward pass
+        X = self.X
         batch_size, height, width, channels = self.X.shape
-        raise Exception("Not implemented!")
+        s = self.stride
+        out_height = int(np.ceil(1 + (height - self.pool_size) / self.stride))
+        out_width = int(np.ceil(1 + (width - self.pool_size) / self.stride))
+        dX = np.zeros_like(X)
 
-    def params(self):
+        for bs in range(batch_size):
+            for ch in range(channels):
+                for oh in range(out_height):
+                    for ow in range(out_width):
+                        X_pool = X[bs, oh * s:np.minimum(oh * s + self.pool_size, height),
+                                   ow * s:np.minimum(ow * s + self.pool_size, width), ch]
+                        dX_pool = np.zeros_like(X_pool)
+                        ind_max = np.unravel_index(np.argmax(X_pool, axis=None), X_pool.shape)
+                        dX_pool[ind_max] = 1
+                        dX[bs, oh * s:np.minimum(oh * s + self.pool_size, height),
+                           ow * s:np.minimum(ow * s + self.pool_size, width), ch] += dX_pool * d_out[bs, oh, ow, ch]
+        return dX
+
+    @staticmethod
+    def params():
         return {}
 
 
@@ -348,13 +366,14 @@ class Flattener:
         # Layer should return array with dimensions
         # [batch_size, height*width*channels]
         self.X = X
-        raise X.reshape(batch_size, -1)
+        return X.reshape(batch_size, -1)
 
     def backward(self, d_out):
         # Implement backward pass
         X = self.X
         return d_out.reshape(X.shape)
 
-    def params(self):
+    @staticmethod
+    def params():
         # No params!
         return {}
