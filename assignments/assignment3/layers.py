@@ -260,7 +260,7 @@ class ConvolutionalLayer:
         s = self.stride
         padding = self.padding
 
-        # TODO: Implement backward pass
+        # Implement backward pass
         # Same as forward, setup variables of the right shape that
         # aggregate input gradient and fill them for every location
         # of the output

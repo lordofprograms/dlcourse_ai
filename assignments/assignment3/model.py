@@ -36,7 +36,7 @@ class ConvNet:
         self.relu1_layer = ReLULayer()
         self.max_pool1_layer = MaxPoolingLayer(pool_size, stride)
         self.conv2_layer = ConvolutionalLayer(conv1_channels, conv2_channels, filter_size, padding)
-        self.relu2_layer = ReLULayer
+        self.relu2_layer = ReLULayer()
         self.max_pool2_layer = MaxPoolingLayer(pool_size, stride)
         self.flattener = Flattener()
         fc_input = int(height / pool_size / pool_size * width / pool_size / pool_size * conv2_channels)
@@ -74,14 +74,14 @@ class ConvNet:
         # Compute loss and fill param gradients
         # Don't worry about implementing L2 regularization, we will not
         # need it in this assignment
-        d_out = self.fc_layer.backward(X)
-        d_out = self.flattener.backward(X)
-        d_out = self.max_pool2_layer.backward(X)
-        d_out = self.relu2_layer.backward(X)
-        d_out = self.conv2_layer.backward(X)
-        d_out = self.max_pool1_layer.backward(X)
-        d_out = self.relu2_layer.backward(X)
-        d_out = self.conv1_layer.backward(X)
+        d_out = self.fc_layer.backward(d_preds)
+        d_out = self.flattener.backward(d_out)
+        d_out = self.max_pool2_layer.backward(d_out)
+        d_out = self.relu2_layer.backward(d_out)
+        d_out = self.conv2_layer.backward(d_out)
+        d_out = self.max_pool1_layer.backward(d_out)
+        d_out = self.relu1_layer.backward(d_out)
+        d_out = self.conv1_layer.backward(d_out)
 
         return loss
 
