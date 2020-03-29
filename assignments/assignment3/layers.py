@@ -184,7 +184,7 @@ class FullyConnectedLayer:
 
 class ConvolutionalLayer:
     def __init__(self, in_channels, out_channels,
-                 filter_size, padding):
+                 filter_size, padding, stride=1):
         '''
         Initializes the layer
         
@@ -207,7 +207,7 @@ class ConvolutionalLayer:
 
         self.padding = padding
 
-        self.stride = None
+        self.stride = stride
         self.X = None
 
     def forward(self, X):
@@ -219,7 +219,6 @@ class ConvolutionalLayer:
         
         # It's ok to use loops for going over width and height
         # but try to avoid having any other loops
-        self.stride = 1
         s = self.stride
 
         # compute output fields by formula: (W−F+2P)/S+1 from http://cs231n.github.io/convolutional-networks/
@@ -314,8 +313,8 @@ class MaxPoolingLayer:
         # Hint: Similarly to Conv layer, loop on
         # output x/y dimension
 
-        out_height = int(np.ceil(1 + (height - self.pool_size) / self.stride))
-        out_width = int(np.ceil(1 + (width - self.pool_size) / self.stride))
+        out_height = int(np.ceil((height - self.pool_size) / self.stride + 1))
+        out_width = int(np.ceil((width - self.pool_size) / self.stride + 1))
 
         out = np.zeros((batch_size, out_height, out_width, channels))
         s = self.stride
@@ -333,8 +332,7 @@ class MaxPoolingLayer:
         X = self.X
         batch_size, height, width, channels = self.X.shape
         s = self.stride
-        out_height = int(np.ceil(1 + (height - self.pool_size) / self.stride))
-        out_width = int(np.ceil(1 + (width - self.pool_size) / self.stride))
+        _, out_height, out_width, _ = d_out.shape
         dX = np.zeros_like(X)
 
         for bs in range(batch_size):
